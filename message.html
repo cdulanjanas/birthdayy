@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            perspective: 1000px;
+            /* Animated background gradient */
+            background: linear-gradient(135deg, #0f0028 0%, #000428 100%);
+            position: relative;
+        }
+        
+        /* Background stars */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.imgur.com/YKY28eT.png');
+            opacity: 0.6;
+            z-index: -2;
+        }
+        
+        /* Twinkling stars */
+        .twinkle-star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            z-index: -1;
+            animation: twinkle 4s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        /* Shooting star */
+        .shooting-star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: linear-gradient(to right, rgba(255,255,255,0), white 50%, rgba(255,255,255,0));
+            z-index: -1;
+            opacity: 0;
+        }
+        
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            z-index: -1;
+            opacity: 0;
+        }
+        
+        /* Aurora effect */
+        .aurora {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(255, 0, 128, 0.05) 0%, 
+                rgba(0, 128, 255, 0.05) 50%, 
+                rgba(128, 0, 255, 0.05) 100%);
+            filter: blur(40px);
+            z-index: -3;
+            animation: aurora-shift 15s infinite alternate;
+        }
+        
+        @keyframes aurora-shift {
+            0% { 
+                background-position: 0% 0%; 
+                opacity: 0.3;
+            }
+            100% { 
+                background-position: 100% 100%; 
+                opacity: 0.5;
+            }
+        }
+        
+        #heartBtn {
+            font-size: 160px;
+            color: #ff4081;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 30px rgba(255, 64, 129, 0.8);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        #message {
+            position: absolute;
+            text-align: center;
+            max-width: 80%;
+            display: none;
+            z-index: 2;
+            /* Removed the black background frame */
+            background: transparent;
+            padding: 30px;
+            border-radius: 20px;
+        }
+        
+        #message h1 {
+            color: #ff80ab;
+            font-size: 50px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 128, 171, 0.7);
+        }
+        
+        #message p {
+            color: white;
+            font-size: 24px;
+            line-height: 1.6;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        #message .signature {
+            color: #ff80ab;
+            font-size: 30px;
+            margin-top: 30px;
+            font-style: italic;
+            text-shadow: 0 0 10px rgba(255, 128, 171, 0.7);
+        }
+        
+        .blast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 64, 129, 0.7);
+            border-radius: 50%;
+            z-index: 1;
+            display: none;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            z-index: 1;
+            display: none;
+        }
+        
+        /* 3D Character styles */
+        .character {
+            position: absolute;
+            width: 80px;
+            height: 120px;
+            z-index: 3;
+            display: none;
+            transform-style: preserve-3d;
+            transition: transform 0.3s;
+        }
+        
+        .character-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+        
+        .character-emoji {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 70px;
+            text-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+        
+        .character-shadow {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 10px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            filter: blur(4px);
+        }
+        
+        #boy {
+            bottom: 30%;
+            left: -150px;
+        }
+        
+        #girl {
+            bottom: 30%;
+            right: -150px;
+        }
+        
+        /* Meeting effect */
+        .meet-heart {
+            position: absolute;
+            font-size: 40px;
+            z-index: 4;
+            opacity: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -150px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Aurora effect -->
+    <div class="aurora"></div>
+    
+    <!-- Background stars from index.html -->
+    <div class="stars"></div>
+    
+    <button id="heartBtn">❤️</button>
+    
+    <div class="blast" id="blast"></div>
+    
+    <!-- 3D Boy and Girl characters -->
+    <div id="boy" class="character">
+        <div class="character-container">
+            <div class="character-emoji">🤵</div>
+            <div class="character-shadow"></div>
+        </div>
+    </div>
+    
+    <div id="girl" class="character">
+        <div class="character-container">
+            <div class="character-emoji">👰</div>
+            <div class="character-shadow"></div>
+        </div>
+    </div>
+    
+    <div id="message">
+        <h1>Happy Birthday Mage panchiiii</h1>
+        <p>
+            Like a free bird soaring through the sky,<br>
+            May your dreams fly high and wide.<br>
+            Wishing you a day full of melodies, joy, and peaceful skies.<br>
+            Happy Birthday, beautiful soul!
+        </p>
+        <div class="signature">Hamadama sathutin inna ❤️</div>
+    </div>
+    
+    <script>
+        // Current Date and Time: 2025-06-06 15:01:17 | User: cdulanjanas
+        
+        // Get elements
+        const heartBtn = document.getElementById('heartBtn');
+        const blast = document.getElementById('blast');
+        const message = document.getElementById('message');
+        const boy = document.getElementById('boy');
+        const girl = document.getElementById('girl');
+        
+        // Create background effects
+        createBackgroundEffects();
+        
+        // Add click event to heart button
+        heartBtn.onclick = function() {
+            console.log("Heart clicked!");
+            
+            // Hide heart button
+            heartBtn.style.display = 'none';
+            
+            // Show and animate blast
+            blast.style.display = 'block';
+            
+            // Create hearts with plain JavaScript
+            createHearts();
+            
+            // Animate the blast circle with JavaScript - SLOWED DOWN
+            animateBlast();
+            
+            // Show message after delay - LONGER DELAY
+            setTimeout(function() {
+                message.style.display = 'block';
+                
+                // Start character animations after message appears
+                setTimeout(animateCharacters, 500);
+            }, 2500);
+        };
+        
+        // Function to create background effects
+        function createBackgroundEffects() {
+            // Create twinkling stars
+            for (let i = 0; i < 100; i++) {
+                createTwinklingStar();
+            }
+            
+            // Create floating particles
+            for (let i = 0; i < 50; i++) {
+                createFloatingParticle();
+            }
+            
+            // Create occasional shooting stars
+            setInterval(createShootingStar, 3000);
+        }
+        
+        // Function to create a twinkling star
+        function createTwinklingStar() {
+            const star = document.createElement('div');
+            star.className = 'twinkle-star';
+            
+            // Random size
+            const size = 1 + Math.random() * 3;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            
+            // Random position
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            
+            // Random animation delay
+            star.style.animationDelay = Math.random() * 4 + 's';
+            
+            document.body.appendChild(star);
+        }
+        
+        // Function to create a floating particle
+        function createFloatingParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Random size
+            const size = 2 + Math.random() * 4;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Random color
+            const hue = Math.random() * 360;
+            particle.style.backgroundColor = `hsla(${hue}, 100%, 70%, 0.3)`;
+            
+            // Add to body
+            document.body.appendChild(particle);
+            
+            // Start floating animation
+            animateParticle(particle);
+        }
+        
+        // Function to animate a particle
+        function animateParticle(particle) {
+            // Initial position at bottom
+            const startX = Math.random() * window.innerWidth;
+            const startY = window.innerHeight + 10;
+            
+            // Set initial position
+            particle.style.left = startX + 'px';
+            particle.style.top = startY + 'px';
+            particle.style.opacity = '0';
+            
+            // Animation properties
+            const duration = 10 + Math.random() * 20; // seconds
+            const endY = -50; // final position above viewport
+            const amplitude = 50 + Math.random() * 100; // horizontal movement
+            const startTime = Date.now();
+            
+            function updateParticle() {
+                const elapsed = (Date.now() - startTime) / 1000; // seconds
+                const progress = elapsed / duration;
+                
+                if (progress < 1) {
+                    // Calculate vertical position (linear)
+                    const currentY = startY - progress * (startY - endY);
+                    
+                    // Calculate horizontal position (sine wave)
+                    const currentX = startX + Math.sin(progress * 6) * amplitude;
+                    
+                    // Set opacity (fade in, then fade out)
+                    let opacity = 0;
+                    if (progress < 0.1) {
+                        opacity = progress / 0.1; // fade in
+                    } else if (progress > 0.8) {
+                        opacity = (1 - progress) / 0.2; // fade out
+                    } else {
+                        opacity = 1;
+                    }
+                    
+                    // Apply position and opacity
+                    particle.style.left = currentX + 'px';
+                    particle.style.top = currentY + 'px';
+                    particle.style.opacity = opacity;
+                    
+                    requestAnimationFrame(updateParticle);
+                } else {
+                    // Reset particle for reuse
+                    animateParticle(particle);
+                }
+            }
+            
+            // Start animation
+            requestAnimationFrame(updateParticle);
+        }
+        
+        // Function to create a shooting star
+        function createShootingStar() {
+            // Don't always create one (random chance)
+            if (Math.random() > 0.3) return;
+            
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            
+            // Random starting position at top portion of screen
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * (window.innerHeight * 0.5);
+            
+            // Random angle (mostly downward)
+            const angle = Math.PI / 4 + Math.random() * (Math.PI / 2);
+            
+            // Length and duration
+            const length = 100 + Math.random() * 150;
+            const duration = 0.5 + Math.random() * 1;
+            
+            // Apply styles
+            star.style.left = startX + 'px';
+            star.style.top = startY + 'px';
+            star.style.width = length + 'px';
+            star.style.transform = `rotate(${angle}rad)`;
+            
+            document.body.appendChild(star);
+            
+            // Animate
+            setTimeout(() => {
+                star.style.transition = `all ${duration}s linear`;
+                star.style.opacity = '1';
+                star.style.left = (startX + Math.cos(angle) * length * 2) + 'px';
+                star.style.top = (startY + Math.sin(angle) * length * 2) + 'px';
+                
+                // Remove after animation
+                setTimeout(() => {
+                    star.remove();
+                }, duration * 1000);
+            }, 10);
+        }
+        
+        // Function to create flying hearts
+        function createHearts() {
+            console.log("Creating hearts");
+            
+            for (let i = 0; i < 50; i++) {
+                // Create heart element
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '❤️';
+                heart.style.display = 'block';
+                
+                // Position at center
+                heart.style.top = '50%';
+                heart.style.left = '50%';
+                
+                // Random size
+                const size = 10 + Math.random() * 30;
+                heart.style.fontSize = size + 'px';
+                
+                // Add to body
+                document.body.appendChild(heart);
+                
+                // Set final position with JavaScript
+                const angle = Math.random() * 360;
+                const distance = 100 + Math.random() * 500;
+                const finalX = Math.cos(angle * Math.PI / 180) * distance;
+                const finalY = Math.sin(angle * Math.PI / 180) * distance;
+                
+                // Move heart with JavaScript animation - SLOWED DOWN
+                let startTime = null;
+                const duration = 2000 + Math.random() * 2000; // Doubled for slower effect
+                
+                function moveHeart(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Calculate current position
+                    const currentX = progress * finalX;
+                    const currentY = progress * finalY;
+                    
+                    // Apply position
+                    heart.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                    
+                    // Apply opacity
+                    if (progress > 0.7) {
+                        heart.style.opacity = 1 - (progress - 0.7) / 0.3;
+                    }
+                    
+                    // Continue animation if not done
+                    if (progress < 1) {
+                        requestAnimationFrame(moveHeart);
+                    } else {
+                        // Remove heart after animation
+                        heart.remove();
+                    }
+                }
+                
+                // Start animation with a small delay
+                setTimeout(() => {
+                    requestAnimationFrame(moveHeart);
+                }, Math.random() * 500);
+            }
+        }
+        
+        // Function to animate blast - SLOWED DOWN
+        function animateBlast() {
+            console.log("Animating blast");
+            
+            let scale = 0;
+            let opacity = 0.7;
+            const maxScale = 30;
+            
+            function updateBlast() {
+                scale += 0.25; // Reduced for slower effect (was 0.5)
+                opacity -= 0.005; // Reduced for slower effect (was 0.01)
+                
+                blast.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                blast.style.opacity = Math.max(0, opacity);
+                
+                if (scale < maxScale) {
+                    requestAnimationFrame(updateBlast);
+                } else {
+                    blast.style.display = 'none';
+                }
+            }
+            
+            requestAnimationFrame(updateBlast);
+        }
+        
+        // Function to animate 3D boy and girl characters with meeting in center
+        function animateCharacters() {
+            console.log("Animating 3D characters");
+            
+            // Show characters
+            boy.style.display = 'block';
+            girl.style.display = 'block';
+            
+            // Window width and center
+            const windowWidth = window.innerWidth;
+            const centerX = windowWidth / 2;
+            
+            // Character positions
+            let boyPosition = -150;
+            let girlPosition = -150;
+            
+            // Animation step
+            let meetingOccurred = false;
+            
+            function animateFrame() {
+                // Move boy (left to right)
+                boyPosition += 3;
+                boy.style.left = boyPosition + 'px';
+                
+                // Add 3D effect to boy
+                const boyX = boyPosition + 40; // center of boy
+                const boyDistance = Math.abs(boyX - centerX);
+                if (boyDistance < 300) {
+                    // Scale up as character approaches center
+                    const scale = 1 + (1 - boyDistance / 300) * 0.3;
+                    boy.querySelector('.character-container').style.transform = `scale(${scale}) rotateY(${(boyX - centerX) * 0.05}deg)`;
+                }
+                
+                // Move girl (right to left)
+                girlPosition += 3;
+                girl.style.right = girlPosition + 'px';
+                
+                // Add 3D effect to girl
+                const girlX = windowWidth - girlPosition - 40; // center of girl
+                const girlDistance = Math.abs(girlX - centerX);
+                if (girlDistance < 300) {
+                    // Scale up as character approaches center
+                    const scale = 1 + (1 - girlDistance / 300) * 0.3;
+                    girl.querySelector('.character-container').style.transform = `scale(${scale}) rotateY(${(centerX - girlX) * 0.05}deg)`;
+                }
+                
+                // Check if characters are meeting in center
+                if (!meetingOccurred && Math.abs(boyX - girlX) < 100) {
+                    meetingOccurred = true;
+                    charactersMeet();
+                }
+                
+                // Continue until both are off screen
+                if (boyPosition < windowWidth + 150 || girlPosition < windowWidth + 150) {
+                    requestAnimationFrame(animateFrame);
+                }
+            }
+            
+            // Start animation
+            requestAnimationFrame(animateFrame);
+        }
+        
+        // Function for what happens when characters meet
+        function charactersMeet() {
+            console.log("Characters meeting!");
+            
+            // Create a special effect at the meeting point
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    // Create a floating heart
+                    const meetHeart = document.createElement('div');
+                    meetHeart.className = 'meet-heart';
+                    meetHeart.innerHTML = '❤️';
+                    meetHeart.style.opacity = '0';
+                    document.body.appendChild(meetHeart);
+                    
+                    // Randomize position slightly
+                    const offsetX = -20 + Math.random() * 40;
+                    const offsetY = -180 - Math.random() * 50;
+                    meetHeart.style.transform = `translate(calc(-50% + ${offsetX}px), ${offsetY}px)`;
+                    
+                    // Animate the heart
+                    setTimeout(() => {
+                        meetHeart.style.transition = 'all 2s ease-out';
+                        meetHeart.style.opacity = '1';
+                        meetHeart.style.transform = `translate(calc(-50% + ${offsetX}px), ${offsetY - 100}px)`;
+                        
+                        // Remove after animation
+                        setTimeout(() => {
+                            meetHeart.style.opacity = '0';
+                            setTimeout(() => meetHeart.remove(), 1000);
+                        }, 1500);
+                    }, 10);
+                }, i * 200);
+            }
+            
+            // Pause characters briefly
+            boy.style.transition = 'left 0.5s ease-out';
+            girl.style.transition = 'right 0.5s ease-out';
+            
+            // Resume movement after pause
+            setTimeout(() => {
+                boy.style.transition = '';
+                girl.style.transition = '';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
